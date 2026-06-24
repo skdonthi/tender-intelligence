@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".output/public",
+  "installCommand": "npm install",
+  "framework": null,
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic-api-key",
+    "OPENAI_API_KEY":    "@openai-api-key",
+    "COHERE_API_KEY":    "@cohere-api-key",
+    "DATABASE_URL":      "@database-url"
+  }
+}

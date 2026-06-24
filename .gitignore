@@ -1,0 +1,13 @@
+node_modules/
+.output/
+.vinxi/
+dist/
+.env
+*.local
+
+# DB
+drizzle/meta/
+
+# Vite/Vinxi config-load temp artifacts
+*.timestamp_*.js
+*.timestamp-*.mjs
