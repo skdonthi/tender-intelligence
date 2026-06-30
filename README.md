@@ -5,7 +5,7 @@ Built on **TanStack Start** (React 19 + SSR) + **pgvector** + **Claude** — the
 
 **The core problem:** getting LLM extraction accuracy from ~80% to 95%+ on structured official documents. The approach is architectural, not prompt-engineering.
 
-🔗 **Landing page** (GitHub Pages): `https://<your-username>.github.io/patterno-tanstack/` · **Demo video:** `<loom link>`
+🔗 **Live landing page:** [skdonthi.github.io/patterno-tanstack](https://skdonthi.github.io/patterno-tanstack/)
 
 ![Per-lot relevance — "X von Y Losen relevant"](docs/relevance-ux.png)
 
@@ -142,7 +142,7 @@ npm run dev
 
 **Landing page (free, shareable).** `docs/` is a self-contained static landing page.
 Enable it under **Settings → Pages → Deploy from branch → `main` / `docs`** for a public
-URL like `https://<your-username>.github.io/patterno-tanstack/`.
+URL like `https://skdonthi.github.io/patterno-tanstack/`.
 
 **The app** is SSR + Postgres/pgvector + paid LLM keys, so it needs a Node host
 (Railway, Render, Fly) plus a serverless-compatible pgvector database (Neon, Supabase).
