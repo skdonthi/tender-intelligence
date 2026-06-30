@@ -1,81 +1,285 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Patterno Demo — Procurement Document Intelligence</title>
-<meta name="description" content="Structured extraction, hybrid-search RAG, and per-lot relevance scoring over EU & German procurement documents. A demo on TanStack Start · pgvector · Claude." />
-<style>
-  :root {
-    --bg:#F6F6F4; --surface:#FFFFFF; --surface-2:#F0F1F3;
-    --border:#E7E8EB; --border-hi:#D7DAE0;
-    --ink:#15171C; --blue:#2A6FDB; --amber:#B7791F; --green:#16A34A;
-    --text:#1A1D23; --muted:#6B7280; --dim:#4B5563;
-    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,sans-serif;
-  }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  html { scroll-behavior:smooth; }
-  body { font-family:var(--sans); background:var(--bg); color:var(--text);
-         line-height:1.6; -webkit-font-smoothing:antialiased; }
-  a { color:var(--blue); text-decoration:none; }
-  a:hover { text-decoration:underline; }
-  .wrap { max-width:960px; margin:0 auto; padding:0 24px; }
-  .eyebrow { font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
-  section { padding:56px 0; border-top:1px solid var(--border); }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Patterno Demo — Procurement Document Intelligence</title>
+  <meta name="description"
+    content="Structured extraction, hybrid-search RAG, and per-lot relevance scoring over EU & German procurement documents. A demo on TanStack Start · pgvector · Claude." />
+  <style>
+    :root {
+      --bg: #F6F6F4;
+      --surface: #FFFFFF;
+      --surface-2: #F0F1F3;
+      --border: #E7E8EB;
+      --border-hi: #D7DAE0;
+      --ink: #15171C;
+      --blue: #2A6FDB;
+      --amber: #B7791F;
+      --green: #16A34A;
+      --text: #1A1D23;
+      --muted: #6B7280;
+      --dim: #4B5563;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, sans-serif;
+    }
 
-  /* Hero */
-  header.hero { padding:84px 0 64px; }
-  .hero h1 { font-size:clamp(30px,5vw,46px); font-weight:700; line-height:1.12; letter-spacing:-0.02em;
-             text-wrap:balance; margin:14px 0 18px; max-width:18ch; }
-  .hero p.lead { font-size:clamp(15px,2vw,18px); color:var(--dim); max-width:60ch; }
-  .cta { display:flex; flex-wrap:wrap; gap:12px; margin-top:28px; }
-  .btn { display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600;
-         padding:11px 18px; border-radius:8px; border:1px solid var(--border-hi); background:var(--surface); color:var(--text); }
-  .btn.primary { background:var(--ink); color:#fff; border-color:var(--ink); }
-  .btn:hover { text-decoration:none; }
-  .byline { margin-top:22px; font-size:13px; color:var(--muted); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  h2 { font-size:clamp(22px,3vw,28px); font-weight:680; letter-spacing:-0.01em; margin:10px 0 14px; text-wrap:balance; }
-  p.body { color:var(--dim); max-width:66ch; }
-  p.body + p.body { margin-top:12px; }
+    html {
+      scroll-behavior: smooth;
+    }
 
-  figure { margin-top:26px; background:var(--surface); border:1px solid var(--border); border-radius:10px;
-           padding:18px; box-shadow:0 1px 3px rgba(16,18,24,.05); overflow-x:auto; }
-  figure img { display:block; width:100%; height:auto; border-radius:6px; }
-  figure.shot { padding:0; max-width:680px; }
-  figcaption { font-size:12px; color:var(--muted); margin-top:12px; font-family:var(--mono); }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  .lanes { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px; }
-  .lane { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px 16px; box-shadow:0 1px 2px rgba(16,18,24,.05); }
-  .lane h3 { font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--blue); margin-bottom:6px; }
-  .lane.match h3 { color:var(--amber); }
-  .lane p { font-size:13px; color:var(--dim); }
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
 
-  .stack { display:grid; grid-template-columns:1fr 2fr; gap:1px; background:var(--border); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-top:22px; }
-  .stack > div { background:var(--surface); padding:11px 14px; font-size:13px; }
-  .stack .k { font-weight:600; }
-  .stack .v { color:var(--dim); }
+    a:hover {
+      text-decoration: underline;
+    }
 
-  .pill { display:inline-block; font-family:var(--mono); font-size:11px; font-weight:600; color:var(--amber);
-          background:rgba(183,121,31,.12); padding:3px 9px; border-radius:999px; }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
 
-  footer { padding:48px 0 64px; border-top:1px solid var(--border); }
-  footer .body { margin-bottom:18px; }
-  .muted { color:var(--muted); font-size:13px; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
 
-  @media (max-width:720px){ .lanes{ grid-template-columns:1fr; } .stack{ grid-template-columns:1fr; } }
-</style>
+    section {
+      padding: 56px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Hero */
+    header.hero {
+      padding: 84px 0 64px;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 5vw, 46px);
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+      margin: 14px 0 18px;
+      max-width: 18ch;
+    }
+
+    .hero p.lead {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--dim);
+      max-width: 60ch;
+    }
+
+    .cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border-hi);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .btn.primary {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    .btn:hover {
+      text-decoration: none;
+    }
+
+    .byline {
+      margin-top: 22px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    h2 {
+      font-size: clamp(22px, 3vw, 28px);
+      font-weight: 680;
+      letter-spacing: -0.01em;
+      margin: 10px 0 14px;
+      text-wrap: balance;
+    }
+
+    p.body {
+      color: var(--dim);
+      max-width: 66ch;
+    }
+
+    p.body+p.body {
+      margin-top: 12px;
+    }
+
+    figure {
+      margin-top: 26px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 1px 3px rgba(16, 18, 24, .05);
+      overflow-x: auto;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    figure.shot {
+      padding: 0;
+      max-width: 680px;
+    }
+
+    figcaption {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+      font-family: var(--mono);
+    }
+
+    .lanes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .lane {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 2px rgba(16, 18, 24, .05);
+    }
+
+    .lane h3 {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 6px;
+    }
+
+    .lane.match h3 {
+      color: var(--amber);
+    }
+
+    .lane p {
+      font-size: 13px;
+      color: var(--dim);
+    }
+
+    .stack {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 22px;
+    }
+
+    .stack>div {
+      background: var(--surface);
+      padding: 11px 14px;
+      font-size: 13px;
+    }
+
+    .stack .k {
+      font-weight: 600;
+    }
+
+    .stack .v {
+      color: var(--dim);
+    }
+
+    .pill {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--amber);
+      background: rgba(183, 121, 31, .12);
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+
+    footer {
+      padding: 48px 0 64px;
+      border-top: 1px solid var(--border);
+    }
+
+    footer .body {
+      margin-bottom: 18px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width:720px) {
+      .lanes {
+        grid-template-columns: 1fr;
+      }
+
+      .stack {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <header class="hero">
     <div class="wrap">
       <span class="eyebrow">Procurement Document Intelligence</span>
       <h1>From 80% to 95%+ accuracy on official documents.</h1>
-      <p class="lead">Patterno turns EU &amp; German procurement tenders into structured, searchable intelligence — and scores every lot against your profile. This is a working demo built on the production stack: <strong>TanStack Start · PostgreSQL/pgvector · Claude</strong>. The approach to accuracy is architectural, not prompt-tuning.</p>
+      <p class="lead">Patterno turns EU &amp; German procurement tenders into structured, searchable intelligence — and
+        scores every lot against your profile. This is a working demo built on the production stack: <strong>TanStack
+          Start · PostgreSQL/pgvector · Claude</strong>. The approach to accuracy is architectural, not prompt-tuning.
+      </p>
       <div class="cta">
-        <a class="btn primary" href="https://github.com/&lt;your-username&gt;/patterno-tanstack">View the code →</a>
-        <a class="btn" href="https://www.loom.com/&lt;your-demo&gt;">Watch the 2-min demo</a>
+        <a class="btn primary" href="https://github.com/skdonthi/patterno-tanstack">View the code →</a>
       </div>
       <p class="byline">Built by Shiva Krishna Donthi</p>
     </div>
@@ -85,7 +289,10 @@
     <div class="wrap">
       <span class="eyebrow">The problem</span>
       <h2>Reading one tender is easy. Reading 75 of them correctly is the job.</h2>
-      <p class="body">Official procurement documents are long, structured, multilingual, and split into lots. General-purpose extraction gets to ~80% — close enough to look right, wrong often enough to miss a deadline or a qualifying criterion. Closing that last gap is an engineering problem, solved with retrieval and evaluation, not cleverer prompts.</p>
+      <p class="body">Official procurement documents are long, structured, multilingual, and split into lots.
+        General-purpose extraction gets to ~80% — close enough to look right, wrong often enough to miss a deadline or a
+        qualifying criterion. Closing that last gap is an engineering problem, solved with retrieval and evaluation, not
+        cleverer prompts.</p>
     </div>
   </section>
 
@@ -94,12 +301,25 @@
       <span class="eyebrow">How it works</span>
       <h2>Three pipelines: ingest, ask, match.</h2>
       <figure>
-        <img src="./architecture.svg" alt="Architecture: ingest (parse, structure-aware chunk, Claude extract + embed, store in pgvector); ask (hybrid search, Cohere rerank, Claude grounded answer); match (search profile and lots into a Claude relevance judge producing X von Y Losen relevant)." />
+        <img src="./architecture.svg"
+          alt="Architecture: ingest (parse, structure-aware chunk, Claude extract + embed, store in pgvector); ask (hybrid search, Cohere rerank, Claude grounded answer); match (search profile and lots into a Claude relevance judge producing X von Y Losen relevant)." />
       </figure>
       <div class="lanes">
-        <div class="lane"><h3>Ingest</h3><p>PDF → structure-aware chunking → Claude tool-use extraction (one Zod schema is the source of truth) + OpenAI embeddings → Postgres/pgvector.</p></div>
-        <div class="lane"><h3>Ask</h3><p>Hybrid search (vector + Postgres full-text) → Cohere cross-encoder rerank → a grounded Claude answer with source citations.</p></div>
-        <div class="lane match"><h3>Match</h3><p>Each lot judged on its full content against a search profile — not vector similarity — producing the relevance metric below.</p></div>
+        <div class="lane">
+          <h3>Ingest</h3>
+          <p>PDF → structure-aware chunking → Claude tool-use extraction (one Zod schema is the source of truth) +
+            OpenAI embeddings → Postgres/pgvector.</p>
+        </div>
+        <div class="lane">
+          <h3>Ask</h3>
+          <p>Hybrid search (vector + Postgres full-text) → Cohere cross-encoder rerank → a grounded Claude answer with
+            source citations.</p>
+        </div>
+        <div class="lane match">
+          <h3>Match</h3>
+          <p>Each lot judged on its full content against a search profile — not vector similarity — producing the
+            relevance metric below.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -108,9 +328,12 @@
     <div class="wrap">
       <span class="eyebrow">The metric that matters</span>
       <h2>Per-lot relevance: <span class="pill">X von Y Losen relevant</span></h2>
-      <p class="body">A buyer's profile and a tender lot can share vocabulary without being a real fit. So relevance is an LLM judge over the full lot content — assessing genuine fit, with a score and a one-line reason per lot — rather than an embedding-similarity guess. The same philosophy Patterno's HIT product is built on.</p>
+      <p class="body">A buyer's profile and a tender lot can share vocabulary without being a real fit. So relevance is
+        an LLM judge over the full lot content — assessing genuine fit, with a score and a one-line reason per lot —
+        rather than an embedding-similarity guess. The same philosophy Patterno's HIT product is built on.</p>
       <figure class="shot">
-        <img src="./relevance-ux.png" alt="Lot relevance UI: a search profile scored against three procurement lots, showing 2 von 3 Losen relevant, each lot marked relevant or not with a confidence percentage and a one-line reason." />
+        <img src="./relevance-ux.png"
+          alt="Lot relevance UI: a search profile scored against three procurement lots, showing 2 von 3 Losen relevant, each lot marked relevant or not with a confidence percentage and a one-line reason." />
       </figure>
     </div>
   </section>
@@ -120,11 +343,16 @@
       <span class="eyebrow">Stack</span>
       <h2>The same tools, end to end.</h2>
       <div class="stack">
-        <div class="k">Framework</div><div class="v">TypeScript, React 19, TanStack Start (SSR, server functions on Vite)</div>
-        <div class="k">Database</div><div class="v">PostgreSQL + pgvector + Drizzle ORM — hybrid vector + full-text search</div>
-        <div class="k">Extraction</div><div class="v">Anthropic Claude via tool_use; Vertex AI / Gemini multimodal path for scanned PDFs</div>
-        <div class="k">Retrieval</div><div class="v">OpenAI embeddings; Cohere rerank (optional, graceful fallback)</div>
-        <div class="k">Accuracy</div><div class="v">Per-field eval loop measuring precision against a labeled set</div>
+        <div class="k">Framework</div>
+        <div class="v">TypeScript, React 19, TanStack Start (SSR, server functions on Vite)</div>
+        <div class="k">Database</div>
+        <div class="v">PostgreSQL + pgvector + Drizzle ORM — hybrid vector + full-text search</div>
+        <div class="k">Extraction</div>
+        <div class="v">Anthropic Claude via tool_use; Vertex AI / Gemini multimodal path for scanned PDFs</div>
+        <div class="k">Retrieval</div>
+        <div class="v">OpenAI embeddings; Cohere rerank (optional, graceful fallback)</div>
+        <div class="k">Accuracy</div>
+        <div class="v">Per-field eval loop measuring precision against a labeled set</div>
       </div>
     </div>
   </section>
@@ -132,12 +360,15 @@
   <footer>
     <div class="wrap">
       <h2 style="margin-bottom:14px">Read the code.</h2>
-      <p class="body">The README has a 4-step local setup and the full accuracy rationale. This page is hosted from the repo's <code>/docs</code> folder via GitHub Pages.</p>
+      <p class="body">The README has a 4-step local setup and the full accuracy rationale. This page is hosted from the
+        repo's <code>/docs</code> folder via GitHub Pages.</p>
       <div class="cta">
-        <a class="btn primary" href="https://github.com/&lt;your-username&gt;/patterno-tanstack">github.com/&lt;your-username&gt;/patterno-tanstack →</a>
+        <a class="btn primary" href="https://github.com/skdonthi/patterno-tanstack">Read patterno-tanstack
+          →</a>
       </div>
       <p class="byline muted">Patterno Demo · built for the founding-engineer conversation.</p>
     </div>
   </footer>
 </body>
+
 </html>
