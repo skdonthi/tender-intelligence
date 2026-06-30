@@ -5,7 +5,7 @@ Built on **TanStack Start** (React 19 + SSR) + **pgvector** + **Claude** — the
 
 **The core problem:** getting LLM extraction accuracy from ~80% to 95%+ on structured official documents. The approach is architectural, not prompt-engineering.
 
-🔗 **Live landing page:** [skdonthi.github.io/patterno-tanstack](https://skdonthi.github.io/patterno-tanstack/)
+🔗 **[Live landing page →](https://skdonthi.github.io/patterno-tanstack/)**
 
 ![Per-lot relevance — "X von Y Losen relevant"](docs/relevance-ux.png)
 
