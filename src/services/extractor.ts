@@ -1,19 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { ProcurementExtraction, buildExtractionTool } from "./extractionSchema";
 import { scoreCompleteness } from "./scoring";
-
-// Lazy client — construct on first use so a missing key fails at the point of
-// use with a clear message, not at import time.
-let _anthropic: Anthropic | null = null;
-function anthropic(): Anthropic {
-  if (!_anthropic) {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error("ANTHROPIC_API_KEY is not set — required for extraction");
-    }
-    _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  }
-  return _anthropic;
-}
+import { getAnthropic } from "./llm";
 
 // We extract from the first N tokens of the document for the structured pass.
 // For long docs (>100 pages), a separate "section routing" step would identify
@@ -47,7 +34,7 @@ export async function extractProcurementData(
 ): Promise<ExtractionResult> {
   const truncated = rawText.slice(0, MAX_EXTRACTION_CHARS);
 
-  const response = await anthropic().messages.create({
+  const response = await getAnthropic().messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 2048,
     tools: [buildExtractionTool()],

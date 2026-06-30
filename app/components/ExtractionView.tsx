@@ -1,4 +1,6 @@
-import type { DocDetail } from "../lib/api";
+import { useState } from "react";
+import type { DocDetail, RelevanceResponse } from "../lib/api";
+import { api } from "../lib/api";
 import { ConfidenceMeter } from "./ConfidenceMeter";
 
 interface Props {
@@ -123,6 +125,128 @@ export function ExtractionView({ doc }: Props) {
         )}
       </div>
 
+      {/* Per-lot relevance (mirrors Patterno HIT's "X von Y Losen relevant") */}
+      <LotRelevancePanel doc={doc} />
+
+    </div>
+  );
+}
+
+// ── Lot relevance ─────────────────────────────────────────────────────────────
+// Scores each lot against a free-text search profile via an LLM judge (not vector
+// similarity) — the "X von Y Losen relevant" metric from Patterno's HIT product.
+
+function LotRelevancePanel({ doc }: { doc: DocDetail }) {
+  const [profile, setProfile] = useState("");
+  const [result, setResult]   = useState<RelevanceResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+
+  async function run() {
+    if (!profile.trim() || loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      setResult(await api.scoreRelevance(doc.id, profile));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const tier =
+    result && result.totalCount > 0
+      ? result.relevantCount === 0
+        ? "low"
+        : result.relevantCount === result.totalCount
+          ? "high"
+          : "mid"
+      : "mid";
+  const badgeColor =
+    tier === "high" ? "var(--green)" : tier === "low" ? "var(--text-muted)" : "var(--amber)";
+
+  return (
+    <div className="relevance">
+      <div className="section-label">Lot relevance</div>
+
+      <div style={{ display: "flex", gap: "8px", marginBottom: result || error ? "12px" : 0 }}>
+        <input
+          className="relevance-input"
+          value={profile}
+          onChange={(e) => setProfile(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") run(); }}
+          placeholder="Your search profile — what does your company bid on?"
+          disabled={loading}
+          style={{
+            flex: 1, background: "var(--surface-hi)", border: "1px solid var(--border-hi)",
+            borderRadius: "var(--radius)", padding: "8px 10px", fontFamily: "var(--sans)",
+            fontSize: "12px", color: "var(--text)", outline: "none",
+          }}
+        />
+        <button
+          onClick={run}
+          disabled={loading || !profile.trim()}
+          style={{
+            background: "var(--ink)", color: "#fff", border: "none",
+            borderRadius: "var(--radius)", padding: "0 14px", fontSize: "12px",
+            fontWeight: 500, cursor: loading || !profile.trim() ? "default" : "pointer",
+            opacity: loading || !profile.trim() ? 0.5 : 1,
+          }}
+        >
+          {loading ? "Scoring…" : "Score lots"}
+        </button>
+      </div>
+
+      {error && (
+        <div style={{ fontSize: "12px", color: "var(--red)", fontFamily: "var(--mono)" }}>
+          {error}
+        </div>
+      )}
+
+      {result && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <span
+            className="relevance-badge"
+            style={{
+              alignSelf: "flex-start", fontFamily: "var(--mono)", fontSize: "11px",
+              fontWeight: 500, padding: "3px 8px", borderRadius: "var(--radius)",
+              color: badgeColor, border: `1px solid ${badgeColor}`,
+            }}
+          >
+            {result.relevantCount} von {result.totalCount} Losen relevant
+          </span>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            {result.lots.map((l) => (
+              <div
+                key={l.lotNumber}
+                className="relevance-lot"
+                style={{
+                  padding: "8px 12px", background: "var(--surface)",
+                  border: "1px solid var(--border)", borderRadius: "var(--radius)",
+                  borderLeft: `2px solid ${l.relevant ? "var(--green)" : "var(--border-hi)"}`,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+                  <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: l.relevant ? "var(--green)" : "var(--text-muted)", minWidth: "44px" }}>
+                    {l.relevant ? "RELEVANT" : "—"}
+                  </span>
+                  <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text)", flex: 1 }}>
+                    {l.lotNumber !== "—" ? `LOT ${l.lotNumber} · ` : ""}{l.title}
+                  </span>
+                  <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--text-muted)" }}>
+                    {Math.round(l.score * 100)}%
+                  </span>
+                </div>
+                <div style={{ fontSize: "11px", color: "var(--text-dim)", marginTop: "3px", lineHeight: 1.45 }}>
+                  {l.reason}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

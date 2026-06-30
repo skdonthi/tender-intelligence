@@ -5,6 +5,7 @@ import {
   getDocument,
   uploadDocument,
   askDocument,
+  scoreRelevance,
 } from "./serverFns";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -34,6 +35,21 @@ export interface AskResponse {
   sources: SearchResult[];
 }
 
+export interface LotRelevance {
+  lotNumber: string;
+  title:     string;
+  relevant:  boolean;
+  score:     number;
+  reason:    string;
+}
+
+export interface RelevanceResponse {
+  profile:       string;
+  relevantCount: number;
+  totalCount:    number;
+  lots:          LotRelevance[];
+}
+
 // ── Client API ───────────────────────────────────────────────────────────────
 // Thin wrappers over server functions. No fetch / hardcoded base URL — the Start
 // plugin handles the client→server RPC transport. The casts bridge the server
@@ -52,4 +68,7 @@ export const api = {
 
   ask: (documentId: string, question: string) =>
     askDocument({ data: { documentId, question } }) as Promise<AskResponse>,
+
+  scoreRelevance: (documentId: string, profile: string) =>
+    scoreRelevance({ data: { documentId, profile } }) as Promise<RelevanceResponse>,
 };

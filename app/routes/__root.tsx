@@ -42,13 +42,15 @@ function RootComponent() {
 const GLOBAL_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0A0C10; --surface: #111318; --surface-hi: #1C2030;
-    --border: #1E2330; --border-hi: #2D3548;
-    --blue: #2A6FDB; --blue-dim: #1A3F7A;
-    --green: #4ADE80; --amber: #F59E0B; --red: #EF4444;
-    --text: #E2E8F0; --text-muted: #64748B; --text-dim: #94A3B8;
+    /* Light theme — aligned to Patterno HIT's airy, card-based UI. */
+    --bg: #F6F6F4; --surface: #FFFFFF; --surface-hi: #F0F1F3;
+    --border: #E7E8EB; --border-hi: #D7DAE0;
+    --blue: #2A6FDB; --blue-dim: #DCE7F9;
+    --ink: #15171C; /* near-black primary buttons / active items */
+    --green: #16A34A; --amber: #B7791F; --red: #DC2626;
+    --text: #1A1D23; --text-muted: #6B7280; --text-dim: #4B5563;
     --mono: 'IBM Plex Mono', monospace; --sans: 'Inter', system-ui, sans-serif;
-    --radius: 3px;
+    --radius: 6px;
   }
   html, body { height: 100%; background: var(--bg); color: var(--text);
     font-family: var(--sans); font-size: 14px; line-height: 1.5;
@@ -216,4 +218,19 @@ const GLOBAL_CSS = `
   @media (prefers-reduced-motion: reduce) {
     *, .status-dot, .spinner { animation: none !important; transition: none !important; }
   }
+
+  /* ── HIT-style light polish ──────────────────────────────────────────────── */
+  /* Soft shadows give white surfaces the airy "card" lift HIT uses. */
+  .fields-grid, .lot-row, .source-item, .qa-hint, .upload-zone,
+  .missing-notice, .relevance-lot, .msg.assistant .msg-body {
+    box-shadow: 0 1px 2px rgba(16, 18, 24, 0.05);
+  }
+  header { box-shadow: 0 1px 0 var(--border); }
+  /* Pill-shaped tags / badges, like HIT's category + relevance chips. */
+  .conf-badge, .cpv-tag, .relevance-badge { border-radius: 999px; }
+  /* Dark near-black primary buttons (HIT's "Details ansehen" style). */
+  .qa-send { background: var(--ink); }
+  .qa-send:hover:not(:disabled) { background: #2A2E38; }
+  /* Amber relevance badge as a soft filled pill (matches "X von Y Losen relevant"). */
+  .relevance-badge { background: rgba(183, 121, 31, 0.12); border-color: transparent !important; }
 `;

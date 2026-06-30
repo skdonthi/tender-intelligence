@@ -1,0 +1,90 @@
+<svg viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#9aa0aa"/>
+    </marker>
+    <style>
+      .box { fill:#fff; stroke:#D7DAE0; rx:7; }
+      .t   { fill:#1A1D23; font-size:12.5px; font-weight:600; }
+      .s   { fill:#6B7280; font-size:10.5px; }
+      .eye { fill:#9aa0aa; font-size:10px; font-weight:700; letter-spacing:.12em; }
+      .lk  { stroke:#9aa0aa; stroke-width:1.4; fill:none; }
+      .claude { fill:#F0F5FE; stroke:#9FBEF0; }
+      .store  { fill:#F4F4F2; stroke:#CFD2D8; }
+      .amber  { fill:#FBF1DF; stroke:#E3C58A; }
+    </style>
+  </defs>
+
+  <rect width="980" height="360" fill="#F6F6F4"/>
+
+  <!-- INGEST -->
+  <text class="eye" x="40" y="40">INGEST</text>
+  <g>
+    <rect class="box" x="40"  y="52" width="180" height="58" rx="7"/>
+    <text class="t" x="130" y="78" text-anchor="middle">Procurement PDF</text>
+    <text class="s" x="130" y="95" text-anchor="middle">EU / German tender</text>
+
+    <rect class="box" x="274" y="52" width="180" height="58" rx="7"/>
+    <text class="t" x="364" y="78" text-anchor="middle">Parse + chunk</text>
+    <text class="s" x="364" y="95" text-anchor="middle">structure-aware</text>
+
+    <rect class="box claude" x="508" y="52" width="180" height="58" rx="7"/>
+    <text class="t" x="598" y="78" text-anchor="middle">Claude extract</text>
+    <text class="s" x="598" y="95" text-anchor="middle">Zod tool_use · + embed</text>
+
+    <rect class="box store" x="742" y="52" width="180" height="58" rx="7"/>
+    <text class="t" x="832" y="78" text-anchor="middle">Postgres + pgvector</text>
+    <text class="s" x="832" y="95" text-anchor="middle">fields · lots · vectors</text>
+
+    <line class="lk" x1="220" y1="81" x2="270" y2="81" marker-end="url(#arr)"/>
+    <line class="lk" x1="454" y1="81" x2="504" y2="81" marker-end="url(#arr)"/>
+    <line class="lk" x1="688" y1="81" x2="738" y2="81" marker-end="url(#arr)"/>
+  </g>
+
+  <!-- ASK -->
+  <text class="eye" x="40" y="170">ASK (RAG)</text>
+  <g>
+    <rect class="box" x="40"  y="182" width="180" height="58" rx="7"/>
+    <text class="t" x="130" y="208" text-anchor="middle">Question</text>
+    <text class="s" x="130" y="225" text-anchor="middle">about a document</text>
+
+    <rect class="box" x="274" y="182" width="180" height="58" rx="7"/>
+    <text class="t" x="364" y="208" text-anchor="middle">Hybrid search</text>
+    <text class="s" x="364" y="225" text-anchor="middle">vector + full-text</text>
+
+    <rect class="box" x="508" y="182" width="180" height="58" rx="7"/>
+    <text class="t" x="598" y="208" text-anchor="middle">Cohere rerank</text>
+    <text class="s" x="598" y="225" text-anchor="middle">cross-encoder → top-K</text>
+
+    <rect class="box claude" x="742" y="182" width="180" height="58" rx="7"/>
+    <text class="t" x="832" y="208" text-anchor="middle">Claude answer</text>
+    <text class="s" x="832" y="225" text-anchor="middle">grounded + citations</text>
+
+    <line class="lk" x1="220" y1="211" x2="270" y2="211" marker-end="url(#arr)"/>
+    <line class="lk" x1="454" y1="211" x2="504" y2="211" marker-end="url(#arr)"/>
+    <line class="lk" x1="688" y1="211" x2="738" y2="211" marker-end="url(#arr)"/>
+  </g>
+
+  <!-- store feeds hybrid search -->
+  <path class="lk" d="M832 110 L832 140 L364 140 L364 180" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+  <text class="s" x="500" y="134" text-anchor="middle">retrieval reads the store</text>
+
+  <!-- MATCH -->
+  <text class="eye" x="40" y="294">MATCH</text>
+  <g>
+    <rect class="box" x="40"  y="296" width="270" height="50" rx="7"/>
+    <text class="t" x="175" y="318" text-anchor="middle">Search profile  ×  extracted lots</text>
+    <text class="s" x="175" y="334" text-anchor="middle">"what does your company bid on?"</text>
+
+    <rect class="box claude" x="364" y="296" width="240" height="50" rx="7"/>
+    <text class="t" x="484" y="318" text-anchor="middle">Claude relevance judge</text>
+    <text class="s" x="484" y="334" text-anchor="middle">full-content, per lot — not vector sim</text>
+
+    <rect class="box amber" x="658" y="296" width="264" height="50" rx="7"/>
+    <text class="t" x="790" y="318" text-anchor="middle">"X von Y Losen relevant"</text>
+    <text class="s" x="790" y="334" text-anchor="middle">per-lot score + reason</text>
+
+    <line class="lk" x1="310" y1="321" x2="360" y2="321" marker-end="url(#arr)"/>
+    <line class="lk" x1="604" y1="321" x2="654" y2="321" marker-end="url(#arr)"/>
+  </g>
+</svg>

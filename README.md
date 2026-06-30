@@ -1,11 +1,13 @@
 # Patterno Demo — Procurement Document Intelligence
 
-Structured extraction and semantic search over government procurement documents.
+Structured extraction, hybrid-search RAG, and **per-lot relevance scoring** over EU & German procurement documents.
 Built on **TanStack Start** (React 19 + SSR) + **pgvector** + **Claude** — the same stack Patterno uses in production.
 
 **The core problem:** getting LLM extraction accuracy from ~80% to 95%+ on structured official documents. The approach is architectural, not prompt-engineering.
 
-🔗 **[Live demo →](https://patterno-demo.vercel.app)**
+🔗 **Landing page** (GitHub Pages): `https://<your-username>.github.io/patterno-tanstack/` · **Demo video:** `<loom link>`
+
+![Per-lot relevance — "X von Y Losen relevant"](docs/relevance-ux.png)
 
 ---
 
@@ -19,8 +21,9 @@ Built on **TanStack Start** (React 19 + SSR) + **pgvector** + **Claude** — the
 | LLM extraction | Anthropic Claude `claude-sonnet-4-6` via tool_use |
 | Embeddings | OpenAI `text-embedding-3-small` (1536 dims) |
 | Reranker | Cohere `rerank-v3.5` (cross-encoder, optional) |
+| Lot relevance | Claude full-content judge, per lot — not vector similarity |
 | Schema validation | Zod |
-| Deployment | Vercel (API keys stay server-side, never in browser) |
+| Hosting | Landing page on GitHub Pages (`/docs`); the app runs locally or on any Node host |
 
 ---
 
@@ -50,6 +53,8 @@ stay in the Vercel dashboard, not in the codebase.
 ---
 
 ## Architecture decisions
+
+![Pipelines — ingest, ask, match](docs/architecture.svg)
 
 ### 1. Structure-aware chunking (`src/services/chunker.ts`)
 
@@ -88,14 +93,24 @@ Measures per-field extraction precision against a labeled test set. The 80% → 
 gap requires knowing exactly which fields fail, on which document types. This is
 the feedback loop that makes iteration possible.
 
+### 5. Per-lot relevance scoring (`src/services/relevance.ts`)
+
+Mirrors Patterno HIT's headline metric — **"X von Y Losen relevant"**. Each lot is
+judged against a free-text search profile by an LLM reading the *full* lot content,
+returning a relevance decision, a 0–1 score, and a one-line reason — deliberately
+**not** embedding cosine similarity. A buyer's profile and a tender lot can share
+vocabulary without being a real fit; a reader catches that, a similarity score
+doesn't. (The same "full-content assessment, not vector similarity alone" approach
+HIT is built on.)
+
 ---
 
 ## Run locally
 
 ```bash
 # 1. Clone + install
-git clone https://github.com/YOUR_USERNAME/patterno-demo
-cd patterno-demo
+git clone https://github.com/skdonthi/patterno-tanstack
+cd patterno-tanstack
 npm install
 
 # 2. Start PostgreSQL with pgvector — POSTGRES_DB must match the DB name in
@@ -123,25 +138,19 @@ npm run dev
 
 ---
 
-## Deploy to Vercel
+## Hosting
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
+**Landing page (free, shareable).** `docs/` is a self-contained static landing page.
+Enable it under **Settings → Pages → Deploy from branch → `main` / `docs`** for a public
+URL like `https://<your-username>.github.io/patterno-tanstack/`.
 
-# Deploy
-vercel
+**The app** is SSR + Postgres/pgvector + paid LLM keys, so it needs a Node host
+(Railway, Render, Fly) plus a serverless-compatible pgvector database (Neon, Supabase).
+`npm run build` → `npm start` serves `dist/server/server.js`.
 
-# Set environment variables in Vercel dashboard (or CLI):
-vercel env add ANTHROPIC_API_KEY
-vercel env add OPENAI_API_KEY
-vercel env add COHERE_API_KEY
-vercel env add DATABASE_URL   # use Neon or Supabase for serverless-compatible Postgres
-
-vercel --prod
-```
-
-Keys are stored in Vercel's encrypted environment — never in the browser or repo.
+> Vercel can host TanStack Start, but this version's `vite build` has no turnkey Vercel
+> SSR target — it needs a hosting adapter. For sharing with a recruiter, the repo + the
+> GitHub Pages landing page + a short demo video is the highest-signal, lowest-risk path.
 
 ---
 
@@ -156,27 +165,35 @@ app/
     index.tsx         # Dashboard page — loader + React 19 components
   components/
     DocumentRail.tsx      # Left rail — doc list + upload
-    ExtractionView.tsx    # Centre — structured fields
+    ExtractionView.tsx    # Centre — structured fields + lot-relevance panel
     QAPanel.tsx           # Right — RAG Q&A
-    ConfidenceMeter.tsx   # Signature UI element
+    ConfidenceMeter.tsx   # Field-completeness meter
   lib/
-    serverFns.ts          # Server functions (list / get / upload / ask)
+    serverFns.ts          # Server functions (list / get / upload / ask / relevance)
     api.ts                # Typed client wrapper over the server functions
 
 src/
   services/
     chunker.ts            # Structure-aware PDF chunking
     extractionSchema.ts   # Zod schema + Claude tool definition
-    extractor.ts          # Claude tool_use + confidence scoring
+    extractor.ts          # Claude tool_use extraction
+    scoring.ts            # Field-completeness scoring (shared)
+    relevance.ts          # Per-lot relevance judge (LLM, full-content)
+    llm.ts                # Shared lazy Anthropic client
     ingest.ts             # Full pipeline orchestration
     search.ts             # Hybrid search + Cohere rerank + RAG Q&A
   db/
-    schema.ts             # Drizzle schema with pgvector custom type
+    schema.ts             # Drizzle schema (pgvector custom type)
     client.ts             # DB singleton
 
 scripts/
   eval.ts                 # Per-field precision eval loop
 
 drizzle/
-  0000_init.sql           # pgvector setup, IVFFlat index, tsvector
+  0000_init.sql           # pgvector setup, HNSW index, generated tsvector
+
+docs/                     # GitHub Pages landing page
+  index.html              # Self-contained landing page
+  architecture.svg        # Pipeline diagram
+  relevance-ux.png        # Lot-relevance UI screenshot
 ```

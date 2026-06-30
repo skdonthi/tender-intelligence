@@ -4,6 +4,7 @@ import { db } from "../../src/db/client";
 import { documents } from "../../src/db/schema";
 import { ingestDocument } from "../../src/services/ingest";
 import { askDocument as runAsk } from "../../src/services/search";
+import { scoreLotRelevance } from "../../src/services/relevance";
 import type { ProcurementExtraction } from "../../src/services/extractionSchema";
 
 // Cap upload size. The endpoint is unauthenticated; a size limit is the minimum
@@ -74,6 +75,45 @@ export const askDocument = createServerFn({ method: "POST" })
     return { documentId: d.documentId, question: d.question };
   })
   .handler(async ({ data }) => runAsk(data.question, data.documentId));
+
+export const scoreRelevance = createServerFn({ method: "POST" })
+  .validator((data: unknown) => {
+    const d = data as { documentId?: string; profile?: string };
+    if (!d?.documentId) throw new Error("documentId is required");
+    if (!d?.profile?.trim()) throw new Error("a search profile is required");
+    return { documentId: d.documentId, profile: d.profile };
+  })
+  .handler(async ({ data }) => {
+    let ex: ProcurementExtraction | null;
+    try {
+      const [doc] = await db
+        .select({ extracted: documents.extracted })
+        .from(documents)
+        .where(eq(documents.id, data.documentId));
+      if (!doc) throw new Error("Document not found");
+      ex = doc.extracted as ProcurementExtraction | null;
+    } catch (err) {
+      if (err instanceof Error && err.message === "Document not found") throw err;
+      sanitize("load document", err);
+    }
+    const lots = (ex?.lots ?? []).map((l) => ({
+      lotNumber: l.lotNumber,
+      title: l.title,
+      description: l.description,
+    }));
+    // Single-lot procurements have no lots array — score the procurement itself.
+    const items =
+      lots.length > 0
+        ? lots
+        : ex
+          ? [{ lotNumber: "—", title: ex.title ?? "Procurement", description: ex.description }]
+          : [];
+    try {
+      return await scoreLotRelevance(data.profile, items);
+    } catch (err) {
+      sanitize("score relevance", err);
+    }
+  });
 
 export const uploadDocument = createServerFn({ method: "POST" })
   .validator((data: unknown) => {

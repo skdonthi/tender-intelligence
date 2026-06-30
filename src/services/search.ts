@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { CohereClient } from "cohere-ai";
 import { db } from "../db/client";
 import { sql } from "drizzle-orm";
+import { getAnthropic } from "./llm";
 
 // Lazy clients — construct on first use, not at import. A missing key then
 // fails at the point of use with a clear message, instead of crashing the whole
@@ -234,9 +235,6 @@ export async function askDocument(
   question: string,
   documentId: string
 ): Promise<{ answer: string; sources: SearchResult[] }> {
-  const { default: Anthropic } = await import("@anthropic-ai/sdk");
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
   const sources = await retrieve(question, documentId);
 
   if (sources.length === 0) {
@@ -250,7 +248,7 @@ export async function askDocument(
     .map((s, i) => `[Source ${i + 1}]\n${s.content}`)
     .join("\n\n---\n\n");
 
-  const response = await anthropic.messages.create({
+  const response = await getAnthropic().messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 1024,
     system: `You are a procurement analyst. Answer questions about procurement documents accurately and concisely.
