@@ -187,18 +187,25 @@ export async function rerank(
 
   if (candidates.length === 0) return [];
 
-  const response = await cohere().rerank({
-    model: "rerank-v3.5",
-    query,
-    documents: candidates.map((c) => c.content),
-    topN: topK,
-    returnDocuments: false, // we already have the content
-  });
+  // Reranking is a precision boost, not a dependency: if Cohere rejects the
+  // key or is down, answering from hybrid order beats failing the query.
+  try {
+    const response = await cohere().rerank({
+      model: "rerank-v3.5",
+      query,
+      documents: candidates.map((c) => c.content),
+      topN: topK,
+      returnDocuments: false, // we already have the content
+    });
 
-  return response.results.map((result) => ({
-    ...candidates[result.index],
-    rerankScore: result.relevanceScore,
-  }));
+    return response.results.map((result) => ({
+      ...candidates[result.index],
+      rerankScore: result.relevanceScore,
+    }));
+  } catch (err) {
+    console.warn(`[rerank] rerank failed — falling back to hybrid scores: ${err instanceof Error ? err.message : err}`);
+    return candidates.slice(0, topK);
+  }
 }
 
 // ── Full pipeline: hybrid → rerank ─────────────────────────────────────────────
