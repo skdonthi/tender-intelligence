@@ -9,7 +9,7 @@
     "build": "vite build",
     "start": "node --env-file-if-exists=.env dist/server/server.js",
     "db:studio": "drizzle-kit studio",
-    "eval": "tsx scripts/eval.ts"
+    "eval": "node --env-file-if-exists=.env --import tsx scripts/eval.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",

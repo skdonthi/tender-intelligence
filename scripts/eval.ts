@@ -28,8 +28,9 @@ import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { extractProcurementData } from "../src/services/extractor";
+import { like } from "drizzle-orm";
 import { db } from "../src/db/client";
-import { evalRuns } from "../src/db/schema";
+import { documents, evalRuns } from "../src/db/schema";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -181,9 +182,51 @@ Using a sample eval case instead...
   console.log(`\n── Overall field precision: ${overallPrecision}% (${overallExact}/${overallTotal})\n`);
 
   // ── Persist to DB ─────────────────────────────────────────────────────────────
-  // (Skipped in demo mode — requires running DB)
-  console.log("Tip: Persist results to eval_runs table to track accuracy over time.");
-  console.log("     Set PERSIST_EVALS=true to enable.\n");
+  if (process.env.PERSIST_EVALS === "true") {
+    await persistResults(allResults);
+  } else {
+    console.log("Tip: Persist results to eval_runs table to track accuracy over time.");
+    console.log("     Set PERSIST_EVALS=true to enable.\n");
+  }
+}
+
+/**
+ * Store per-field results in eval_runs, keyed to the ingested document.
+ * Case ids follow "ted-<publication-number>"; ingested TED documents are named
+ * "TED-<publication-number> …", so the join is a filename-prefix lookup.
+ * Cases without a matching document row are skipped (eval still ran — only
+ * trend tracking needs the FK).
+ */
+async function persistResults(results: EvalResult[]) {
+  let persisted = 0;
+  const docIdByCase = new Map<string, string>();
+
+  for (const caseId of new Set(results.map((r) => r.caseId))) {
+    const pub = caseId.replace(/^ted-/, "");
+    const [doc] = await db
+      .select({ id: documents.id })
+      .from(documents)
+      .where(like(documents.filename, `TED-${pub}%`))
+      .limit(1);
+    if (doc) docIdByCase.set(caseId, doc.id);
+    else console.log(`  (no ingested document for ${caseId} — skipping persistence)`);
+  }
+
+  const rows = results
+    .filter((r) => docIdByCase.has(r.caseId))
+    .map((r) => ({
+      documentId: docIdByCase.get(r.caseId)!,
+      field: r.field,
+      expected: r.expected,
+      actual: r.actual,
+      match: r.match,
+    }));
+
+  if (rows.length > 0) {
+    await db.insert(evalRuns).values(rows);
+    persisted = rows.length;
+  }
+  console.log(`Persisted ${persisted} field results to eval_runs.\n`);
 }
 
 async function runWithSampleData() {
