@@ -95,13 +95,14 @@ export function DocumentRail({
           alignItems: "center",
           justifyContent: "center",
           gap: "6px",
-          background: "transparent",
-          border: "1px dashed var(--border, #ccc)",
+          background: "rgba(42,111,219,0.08)",
+          border: "1px solid var(--blue, #2A6FDB)",
           borderRadius: "6px",
           cursor: tedPulling || uploading ? "wait" : "pointer",
           font: "inherit",
           fontSize: "12px",
-          color: "var(--text-muted)",
+          fontWeight: 500,
+          color: "var(--blue, #2A6FDB)",
         }}
       >
         {tedPulling ? (

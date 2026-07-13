@@ -108,7 +108,7 @@ export function ExtractionView({ doc }: Props) {
           <div className="lots-list">
             {ex.lots.map((l) => (
               <div key={l.lotNumber} className="lot-row">
-                <span className="lot-num">LOT {l.lotNumber}</span>
+                <span className="lot-num">LOT {formatLotNumber(l.lotNumber)}</span>
                 <span className="lot-title">{l.title}</span>
                 {l.value?.amount != null && (
                   <span className="lot-value">
@@ -233,7 +233,7 @@ function LotRelevancePanel({ doc }: { doc: DocDetail }) {
                     {l.relevant ? "RELEVANT" : "—"}
                   </span>
                   <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text)", flex: 1 }}>
-                    {l.lotNumber !== "—" ? `LOT ${l.lotNumber} · ` : ""}{l.title}
+                    {l.lotNumber !== "—" ? `LOT ${formatLotNumber(l.lotNumber)} · ` : ""}{l.title}
                   </span>
                   <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--text-muted)" }}>
                     {Math.round(l.score * 100)}%
@@ -286,6 +286,12 @@ function Field({ label, children, mono, fullWidth, small }: FieldProps) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+// eForms lot identifiers are already "LOT-0001"; strip the prefix so UI labels
+// ("LOT …") don't render as "LOT LOT-0001".
+function formatLotNumber(lotNumber: string) {
+  return lotNumber.replace(/^LOT[-\s]*/i, "");
+}
 
 function formatDate(iso: string) {
   const d = new Date(iso);
