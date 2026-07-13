@@ -2,10 +2,14 @@ import { ProcurementExtraction, buildExtractionTool } from "./extractionSchema";
 import { scoreCompleteness } from "./scoring";
 import { getAnthropic } from "./llm";
 
-// We extract from the first N tokens of the document for the structured pass.
+// We extract from the first N chars of the document for the structured pass.
 // For long docs (>100 pages), a separate "section routing" step would identify
 // the most relevant chunks first — intentionally kept simple here for the demo.
-const MAX_EXTRACTION_CHARS = 12_000; // ~3000 tokens, fits in one Claude call
+// 48k chars ≈ 12k tokens: covers a full TED notice (typically ~10–25k chars) in
+// one call. The earlier 12k cap silently hid late-document fields — a 20k-char
+// notice carried its deadline past the window, so the extractor (correctly)
+// reported "not found" while retrieval, which sees all chunks, found it.
+const MAX_EXTRACTION_CHARS = 48_000; // ~12k tokens, fits in one Claude call
 
 export interface ExtractionResult {
   data: ProcurementExtraction;
