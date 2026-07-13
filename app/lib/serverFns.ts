@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "../../src/db/client";
 import { documents } from "../../src/db/schema";
 import { ingestDocument } from "../../src/services/ingest";
+import { ingestFromTed } from "../../src/services/tedIngest";
 import { askDocument as runAsk } from "../../src/services/search";
 import { scoreLotRelevance } from "../../src/services/relevance";
 import type { ProcurementExtraction } from "../../src/services/extractionSchema";
@@ -112,6 +113,22 @@ export const scoreRelevance = createServerFn({ method: "POST" })
       return await scoreLotRelevance(data.profile, items);
     } catch (err) {
       sanitize("score relevance", err);
+    }
+  });
+
+export const pullTedNotices = createServerFn({ method: "POST" })
+  .validator((data: unknown) => {
+    const d = (data ?? {}) as { limit?: number };
+    // Hard cap: every pulled notice runs paid extraction + embedding calls,
+    // and the endpoint is unauthenticated (same reasoning as MAX_UPLOAD_BYTES).
+    const limit = Math.min(Math.max(Math.trunc(Number(d.limit) || 3), 1), 5);
+    return { limit };
+  })
+  .handler(async ({ data }) => {
+    try {
+      return await ingestFromTed({ limit: data.limit });
+    } catch (err) {
+      sanitize("pull TED notices", err);
     }
   });
 

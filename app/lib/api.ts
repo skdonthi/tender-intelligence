@@ -6,6 +6,7 @@ import {
   uploadDocument,
   askDocument,
   scoreRelevance,
+  pullTedNotices,
 } from "./serverFns";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -28,6 +29,12 @@ export interface IngestResponse {
   confidence:    number;
   missingFields: string[];
   extracted:     ProcurementExtraction;
+}
+
+export interface TedPullResponse {
+  totalMatching:   number;
+  ingested:        { publicationNumber: string; documentId: string; title: string; confidence: number }[];
+  skippedExisting: number;
 }
 
 export interface AskResponse {
@@ -65,6 +72,9 @@ export const api = {
     form.append("file", file);
     return uploadDocument({ data: form }) as Promise<IngestResponse>;
   },
+
+  pullTedNotices: (limit = 3) =>
+    pullTedNotices({ data: { limit } }) as Promise<TedPullResponse>,
 
   ask: (documentId: string, question: string) =>
     askDocument({ data: { documentId, question } }) as Promise<AskResponse>,

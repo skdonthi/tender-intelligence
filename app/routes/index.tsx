@@ -20,6 +20,7 @@ function Dashboard() {
   const [activeDoc, setActiveDoc] = useState<DocDetail | null>(null);
   const [loadingDoc, setLoadingDoc] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [tedPulling, setTedPulling] = useState(false);
   const [status, setStatus]       = useState("ready");
   const [toast, setToast]         = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
@@ -60,6 +61,36 @@ function Dashboard() {
     }
   }, [selectDocument]);
 
+  const pullFromTed = useCallback(async () => {
+    setTedPulling(true);
+    setStatus("pulling from TED…");
+    try {
+      const result = await api.pullTedNotices(3);
+      if (result.ingested.length === 0) {
+        showToast(
+          result.skippedExisting > 0
+            ? "No new notices — recent TED results already ingested"
+            : "No matching TED notices in the last 7 days",
+          "success"
+        );
+      } else {
+        showToast(
+          `Ingested ${result.ingested.length} live TED notice${result.ingested.length > 1 ? "s" : ""} · ${result.totalMatching} matching on TED`,
+          "success"
+        );
+        const updated = await api.listDocuments();
+        setDocs(updated);
+        await selectDocument(result.ingested[0].documentId);
+      }
+      setStatus("ready");
+    } catch (e) {
+      showToast((e as Error).message, "error");
+      setStatus("error");
+    } finally {
+      setTedPulling(false);
+    }
+  }, [selectDocument]);
+
   return (
     <div className="app">
       <header>
@@ -80,6 +111,8 @@ function Dashboard() {
         onSelect={selectDocument}
         onUpload={uploadDocument}
         uploading={uploading}
+        onTedPull={pullFromTed}
+        tedPulling={tedPulling}
       />
 
       <main className="centre">
