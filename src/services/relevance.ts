@@ -2,13 +2,13 @@ import { z } from "zod";
 import { getAnthropic } from "./llm";
 
 /**
- * Per-lot relevance scoring — mirrors Patterno HIT's "X von Y Losen relevant".
+ * Per-lot relevance scoring — the "X von Y Losen relevant" metric.
  *
  * Deliberately an LLM judge over the FULL lot content, not embedding cosine
- * similarity. Their product's stated differentiator is "full-text content
- * assessment rather than vector similarity alone, minimizing false positives" —
- * a buyer's profile and a tender lot can share vocabulary without being a real
- * fit (and vice versa), which a similarity score misjudges but a reader doesn't.
+ * similarity. The design premise: full-content assessment rather than vector
+ * similarity alone minimizes false positives — a buyer's profile and a tender
+ * lot can share vocabulary without being a real fit (and vice versa), which a
+ * similarity score misjudges but a reader doesn't.
  */
 
 export interface LotInput {

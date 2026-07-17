@@ -1,11 +1,11 @@
-# Patterno Demo — Procurement Document Intelligence
+# Tender Intelligence — Procurement Document AI
 
 Structured extraction, hybrid-search RAG, and **per-lot relevance scoring** over EU & German procurement documents.
-Built on **TanStack Start** (React 19 + SSR) + **pgvector** + **Claude** — the same stack Patterno uses in production.
+Built on **TanStack Start** (React 19 + SSR) + **pgvector** + **Claude**.
 
 **The core problem:** getting LLM extraction accuracy from ~80% to 95%+ on structured official documents. The approach is architectural, not prompt-engineering.
 
-🔗 **[Live landing page →](https://skdonthi.github.io/patterno-tanstack/)**
+🔗 **[Live landing page →](https://skdonthi.github.io/tender-intelligence/)**
 
 ![Per-lot relevance — "X von Y Losen relevant"](docs/relevance-ux.png)
 
@@ -95,7 +95,7 @@ the feedback loop that makes iteration possible.
 
 ### 5. Per-lot relevance scoring (`src/services/relevance.ts`)
 
-Mirrors Patterno HIT's headline metric — **"X von Y Losen relevant"**. Each lot is
+Surfaces the metric a bidder actually cares about — **"X von Y Losen relevant"** (X of Y lots relevant). Each lot is
 judged against a free-text search profile by an LLM reading the *full* lot content,
 returning a relevance decision, a 0–1 score, and a one-line reason — deliberately
 **not** embedding cosine similarity. A buyer's profile and a tender lot can share
@@ -109,15 +109,15 @@ HIT is built on.)
 
 ```bash
 # 1. Clone + install
-git clone https://github.com/skdonthi/patterno-tanstack
-cd patterno-tanstack
+git clone https://github.com/skdonthi/tender-intelligence
+cd tender-intelligence
 npm install
 
 # 2. Start PostgreSQL with pgvector — POSTGRES_DB must match the DB name in
-#    DATABASE_URL (patterno_demo), or the app connects to a database that
+#    DATABASE_URL (tender_demo), or the app connects to a database that
 #    doesn't exist.
 docker run --name pgvector \
-  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=patterno_demo \
+  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=tender_demo \
   -p 5432:5432 -d pgvector/pgvector:pg16
 
 # 3. Configure environment
@@ -129,7 +129,7 @@ cp .env.example .env
 # Do NOT use `drizzle-kit push`: it can't express the generated tsvector
 # column or the HNSW/GIN index ops, and would silently break hybrid search.
 # No local psql needed — pipe the file through the container:
-docker exec -i pgvector psql -U postgres -d patterno_demo < drizzle/0000_init.sql
+docker exec -i pgvector psql -U postgres -d tender_demo < drizzle/0000_init.sql
 
 # 5. Start dev server
 npm run dev
@@ -142,7 +142,7 @@ npm run dev
 
 **Landing page (free, shareable).** `docs/` is a self-contained static landing page.
 Enable it under **Settings → Pages → Deploy from branch → `main` / `docs`** for a public
-URL like `https://skdonthi.github.io/patterno-tanstack/`.
+URL like `https://skdonthi.github.io/tender-intelligence/`.
 
 **The app** is SSR + Postgres/pgvector + paid LLM keys, so it needs a Node host
 (Railway, Render, Fly) plus a serverless-compatible pgvector database (Neon, Supabase).

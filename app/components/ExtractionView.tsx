@@ -125,7 +125,7 @@ export function ExtractionView({ doc }: Props) {
         )}
       </div>
 
-      {/* Per-lot relevance (mirrors Patterno HIT's "X von Y Losen relevant") */}
+      {/* Per-lot relevance — "X von Y Losen relevant" */}
       <LotRelevancePanel doc={doc} />
 
     </div>
@@ -134,7 +134,7 @@ export function ExtractionView({ doc }: Props) {
 
 // ── Lot relevance ─────────────────────────────────────────────────────────────
 // Scores each lot against a free-text search profile via an LLM judge (not vector
-// similarity) — the "X von Y Losen relevant" metric from Patterno's HIT product.
+// similarity) — the "X von Y Losen relevant" metric.
 
 function LotRelevancePanel({ doc }: { doc: DocDetail }) {
   const [profile, setProfile] = useState("");

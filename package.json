@@ -1,5 +1,5 @@
 {
-  "name": "patterno-demo",
+  "name": "tender-intelligence",
   "version": "0.2.0",
   "description": "Procurement document intelligence — TanStack Start + pgvector + Claude",
   "type": "module",

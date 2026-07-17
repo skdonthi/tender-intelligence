@@ -15,7 +15,7 @@
  *
  * WHY THIS MATTERS:
  * Without a feedback loop like this, you're flying blind on accuracy.
- * The 80% → 95% improvement Patterno is targeting requires knowing exactly
+ * The 80% → 95% improvement this pipeline targets requires knowing exactly
  * which fields are failing, on which document types, and under what conditions.
  *
  * Extension ideas (not implemented here for brevity):

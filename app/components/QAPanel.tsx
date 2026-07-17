@@ -99,7 +99,7 @@ export function QAPanel({ documentId }: Props) {
         {/* Thinking indicator */}
         {loading && (
           <div className="msg assistant">
-            <div className="msg-role">patterno</div>
+            <div className="msg-role">assistant</div>
             <div className="msg-body" style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)" }}>
               <span className="spinner" />
               <span style={{ fontFamily: "var(--mono)", fontSize: "11px" }}>
@@ -148,7 +148,7 @@ function MessageBubble({ message }: { message: Message }) {
 
   return (
     <div className={`msg ${message.role}`}>
-      <div className="msg-role">{message.role === "user" ? "you" : "patterno"}</div>
+      <div className="msg-role">{message.role === "user" ? "you" : "assistant"}</div>
       <div className="msg-body">{message.content}</div>
 
       {message.sources && message.sources.length > 0 && (

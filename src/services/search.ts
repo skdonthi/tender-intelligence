@@ -169,7 +169,7 @@ export async function hybridSearch(
  * The reranker will correctly promote Chunk B — the embedding/BM25 scores
  * couldn't see that Chunk A was just an index entry.
  *
- * For Patterno's 95%+ precision target, this is one of the highest-leverage
+ * For a 95%+ precision target, this is one of the highest-leverage
  * improvements in the retrieval pipeline.
  *
  * Falls back gracefully if COHERE_API_KEY is not set — returns hybrid results

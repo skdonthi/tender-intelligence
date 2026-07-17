@@ -10,7 +10,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Patterno — Procurement Intelligence" },
+      { title: "Tender Intelligence — Procurement Document AI" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,7 +42,7 @@ function RootComponent() {
 const GLOBAL_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    /* Light theme — aligned to Patterno HIT's airy, card-based UI. */
+    /* Light theme — airy, card-based UI. */
     --bg: #F6F6F4; --surface: #FFFFFF; --surface-hi: #F0F1F3;
     --border: #E7E8EB; --border-hi: #D7DAE0;
     --blue: #2A6FDB; --blue-dim: #DCE7F9;

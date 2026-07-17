@@ -96,7 +96,7 @@ function Dashboard() {
       <header>
         <span className="logo">
           <span className="logo-mark" />
-          Patterno
+          Tender Intelligence
         </span>
         <span className="header-tag">Procurement Intelligence</span>
         <div className="header-right">
